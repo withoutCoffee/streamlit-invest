@@ -30,15 +30,38 @@ def load_data(ticker:str, period: str = "5y", interval: str = "1d", chunk_size: 
     try:
         df = yf.download(ticker, period=period, interval=interval, progress=False, threads=True)
         #df.reset_index(inplace=True)
-        #df.set_index('Date', inplace=True)
-        
-        return df
+        return pd.DataFrame(df['Close'][ticker].values, columns=['Close'], index=df.index)
     except Exception as e:
         print(f"Erro ao baixar dados para {ticker}: {e}")
     return 
 
+
 @st.cache_data
-def get_close(data):
-    df = data['Close']
-    df.index = data['Date']
-    return df
+def info(ticker:str)-> pd.DataFrame:
+    """
+    Busca informações principais de uma ação usando yfinance.
+    
+    Parâmetros:
+        ticker (str): Exemplo "PETR4.SA"
+    
+    Retorna:
+        DataFrame com detalhes da empresa
+    """
+    acao = yf.Ticker(ticker)
+    info = acao.info  # Pega dicionário com as informações
+
+    # Monta um dicionário com os campos mais relevantes
+    dados = {
+        "Ticker": info.get("symbol", ticker),
+        "Nome": info.get("longName", "N/A"),
+        "Setor": info.get("sector", "N/A"),
+        "Subsetor": info.get("industry", "N/A"),
+        "Preço Atual": acao.history(period="1d")["Close"].iloc[-1] if not acao.history(period="1d").empty else None,
+        "Valor de Mercado": info.get("marketCap", "N/A"),
+        "P/L (Trailing PE)": info.get("trailingPE", "N/A"),
+        "Dividend Yield": info.get("dividendYield", 0) * 100 if info.get("dividendYield") else 0,
+        "Beta": info.get("beta", "N/A")
+    }
+    # Converte para DataFrame vertical
+    df_vertical = pd.DataFrame.from_dict(dados, orient='index', columns=['Valor'])
+    return df_vertical
