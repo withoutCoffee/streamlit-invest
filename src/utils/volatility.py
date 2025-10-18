@@ -14,12 +14,22 @@ def annualized_volatility_from_prices(prices: Union[pd.Series, pd.DataFrame], re
     if prices.empty:
         return pd.Series(dtype=float)
 
-    if returns == "log":
-        rets = np.log(prices / prices.shift(1)).dropna()
-    else:
-        rets = prices.pct_change().dropna()
+    rets = profit(prices, returns = returns)
 
     vol_daily = rets.std()
     vol_annual = vol_daily * np.sqrt(252)
     vol_pct = vol_annual * 100
+
     return vol_pct.round(2).sort_values(ascending=False)
+
+def profit(prices: pd.Series, returns: str = "log") -> float:
+    """
+    Calcula o lucro percentual de uma série de preços.
+    """
+    if prices.empty:
+        return pd.Series(dtype=float)
+
+    if returns == "log":
+        return np.log(prices / prices.shift(1)).dropna()
+    else:
+        return prices.pct_change().dropna()
