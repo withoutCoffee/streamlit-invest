@@ -26,10 +26,9 @@ def load_ibov_tickers(path:str) -> list:
     return ibov_tickers[:-2] # Duas últimas linhas não são tickers válidos
 
 @st.cache_data
-def load_data(ticker:str, period: str = "5y", interval: str = "1d", chunk_size: int = 50) -> pd.DataFrame:
+def load_data(ticker:str, period: str = "1y", interval: str = "1d", chunk_size: int = 50) -> pd.DataFrame:
     try:
         df = yf.download(ticker, period=period, interval=interval, progress=False, threads=True)
-        #df.reset_index(inplace=True)
         return pd.DataFrame(df['Close'][ticker].values, columns=['Close'], index=df.index)
     except Exception as e:
         print(f"Erro ao baixar dados para {ticker}: {e}")
@@ -59,7 +58,7 @@ def info(ticker:str)-> pd.DataFrame:
         "Preço Atual": acao.history(period="1d")["Close"].iloc[-1] if not acao.history(period="1d").empty else None,
         "Valor de Mercado": info.get("marketCap", "N/A"),
         "P/L (Trailing PE)": info.get("trailingPE", "N/A"),
-        "Dividend Yield": info.get("dividendYield", 0) * 100 if info.get("dividendYield") else 0,
+        "Dividend Yield": info.get("dividendYield", 0) if info.get("dividendYield") else 0,
         "Beta": info.get("beta", "N/A")
     }
     # Converte para DataFrame vertical

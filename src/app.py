@@ -1,9 +1,10 @@
-import streamlit as st
-from utils.data import load_ibov_tickers, load_data, info
-from utils.volatility import annualized_volatility_from_prices
-from utils.moving_average import mean_avarage
 
-from screens.portfolio import display_portfolio_volatility
+import streamlit as st
+from screens.serie import display_series
+from utils.data import load_ibov_tickers
+
+from screens.portfolio import display_portfolio_volatility, retorno_total_carteira
+from utils.volatility import calcular_retorno_carteira
 
 
 def get_markdown(path):
@@ -39,8 +40,20 @@ with tab1:
         st.sidebar.write("Aguardando confirmação...") 
 
 with tab2:
-    tickers = display_portfolio_volatility(period=period, interval=interval, tab=tab2)
-    st.write(tickers)
+    multi_tickers = display_portfolio_volatility(period=period, interval=interval, tab=tab2)
+    selected_tickers = list(map(lambda x: x.split(" - ")[0], multi_tickers))
+    # Graficos 
+    display_series(tab2,selected_tickers, period, interval)
+
+    # retorno da carteira
+    st.subheader("Retorno das ações da carteira")
+    ret_total = calcular_retorno_carteira(selected_tickers, period=period, interval=interval)
+    st.dataframe(ret_total)
+
+    st.write("Retorno de investimento da carteira: de R$1000 e divisão igualitária entre os ativos.")
+    valor_final, lucro = retorno_total_carteira(ret_total, valor_inicial=1000)
+    st.markdown(f"Valor final: **RS {valor_final:.2f}**, Lucro: **RS {lucro:.2f}**")
+    
 
 
     
