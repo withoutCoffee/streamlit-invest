@@ -28,7 +28,7 @@ def load_ibov_tickers(path:str) -> list:
 @st.cache_data
 def load_data(ticker:str, period: str = "1y", interval: str = "1d", chunk_size: int = 50) -> pd.DataFrame:
     try:
-        df = yf.download(ticker, period=period, interval=interval, progress=False, threads=True)
+        df = yf.download(ticker, period=period, interval=interval, progress=False, threads=True, auto_adjust=True)
         return pd.DataFrame(df['Close'][ticker].values, columns=['Close'], index=df.index)
     except Exception as e:
         print(f"Erro ao baixar dados para {ticker}: {e}")
