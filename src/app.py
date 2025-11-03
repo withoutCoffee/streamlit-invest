@@ -47,29 +47,39 @@ with tab1:
 with tab2:
     col1, col2 = st.columns(2)
 
-    p = col1.selectbox("Período", options=["1y", "2y", "3y", "5y", "10y"], index=0,key="selectbox_4")
-    i = col2.selectbox("Intervalo", options=["1d", "1wk", "1mo"], index=0, key="selectbox_5")
+    p = col1.selectbox(
+        "Período", options=["1y", "2y", "3y", "5y", "10y"], index=0, key="selectbox_4"
+    )
+    i = col2.selectbox(
+        "Intervalo", options=["1d", "1wk", "1mo"], index=0, key="selectbox_5"
+    )
 
     # Seleção de ações por volatilidade
     multi_tickers = display_portfolio_volatility(period=p, interval=i, tab=tab2)
-    
-    selected_tickers = list(map(lambda x: x.split(" - ")[0], multi_tickers)) # retira o valor da volatilidade
+
+    selected_tickers = list(
+        map(lambda x: x.split(" - ")[0], multi_tickers)
+    )  # retira o valor da volatilidade
 
     # Graficos se série temporais de preços das ações selecionadas
     display_series(tab2, selected_tickers, period, interval)
 
-    # retorno da carteira
+    # Retorno da carteira
     st.subheader("Retorno das ações da carteira")
     ret_total = calcular_retorno_carteira(
         selected_tickers, period=period, interval=interval
     )
     st.dataframe(ret_total)
 
+    number = st.number_input(
+        "Valor inicial de investimento inicial:",
+        value = 1000
+    )
     st.write(
         "Retorno de investimento da carteira: de R$1000 e divisão igualitária entre os ativos."
     )
     try:
-        valor_final, lucro = retorno_total_carteira(ret_total, valor_inicial=1000)
+        valor_final, lucro = retorno_total_carteira(ret_total, valor_inicial=number)
         st.markdown(f"Valor final: **RS {valor_final:.2f}**, Lucro: **RS {lucro:.2f}**")
     except Exception as e:
         st.write(f"Erro ao calcular retorno da carteira: {e}")
