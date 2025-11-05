@@ -67,4 +67,4 @@ Um manual de bolso dentro do próprio dashboard! Esta aba contém um **guia ráp
 
 ### 🖼️ Prévia do Dashboard
 
-*Adicione aqui uma imagem de alta qualidade do seu dashboard em funcionamento.*
+![Screenshot do Dashboard](img/dash%201-2.png)
