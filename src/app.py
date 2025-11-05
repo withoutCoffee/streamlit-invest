@@ -1,6 +1,6 @@
 import streamlit as st
 
-from utils.data import load_ibov_tickers
+from utils.data import load_ibov_tickers, get_selic
 from utils.volatility import calcular_retorno_carteira
 
 from screens.serie import display_serie
@@ -71,15 +71,17 @@ with tab2:
     )
     st.dataframe(ret_total)
 
-    number = st.number_input(
-        "Valor inicial de investimento inicial:",
-        value = 1000
-    )
+    number = st.number_input("Valor inicial de investimento inicial:", value=1000)
     st.write(
         "Retorno de investimento da carteira: de R$1000 e divisão igualitária entre os ativos."
     )
     try:
         valor_final, lucro = retorno_total_carteira(ret_total, valor_inicial=number)
         st.markdown(f"Valor final: **RS {valor_final:.2f}**, Lucro: **RS {lucro:.2f}**")
+
+        # retorno_selic = calcular_retorno_carteira(
+        #     get_selic(period=int(period.split('y')[0])), period=period, interval=interval
+        # )
+        # st.markdown(f"Valor selic: **RS {retorno_selic:.2f}")
     except Exception as e:
         st.write(f"Erro ao calcular retorno da carteira: {e}")

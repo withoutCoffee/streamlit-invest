@@ -1,7 +1,6 @@
 from utils.data import load_ibov_tickers, load_data
 from utils.volatility import (
     annualized_volatility_from_prices,
-    calcular_retorno_carteira,
 )
 import pandas as pd
 

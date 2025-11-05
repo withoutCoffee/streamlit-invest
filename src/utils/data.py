@@ -1,6 +1,10 @@
-import streamlit as st 
-import pandas as pd 
-import yfinance as yf 
+import streamlit as st
+import pandas as pd
+from datetime import date
+
+import yfinance as yf
+from bcb import sgs
+
 from typing import List
 
 
@@ -10,39 +14,52 @@ def normalize_ticker(t: str) -> str:
     if not s:
         return s
     # se já tem ponto (ex: BVMF:PETR4 ou AAPL) não alteramos; para B3 usamos .SA
-    if '.' not in s:
-        s = s + '.SA'
+    if "." not in s:
+        s = s + ".SA"
     return s
+
 
 def normalize_tickers(tickers: List[str]) -> List[str]:
     return [normalize_ticker(t) for t in tickers if isinstance(t, str) and t.strip()]
 
-@st.cache_data
-def load_ibov_tickers(path:str) -> list:
-    ibov_tickers = pd.read_csv(path, encoding= 'latin1', sep=';', skiprows=1)
+
+def load_ibov_tickers(path: str) -> list:
+    ibov_tickers = pd.read_csv(path, encoding="latin1", sep=";", skiprows=1)
     ibov_tickers = ibov_tickers.index
     ibov_tickers = normalize_tickers(ibov_tickers)
 
-    return ibov_tickers[:-2] # Duas últimas linhas não são tickers válidos
+    return ibov_tickers[:-2]  # Duas últimas linhas não são tickers válidos
+
 
 @st.cache_data
-def load_data(ticker:str, period: str = "1y", interval: str = "1d", chunk_size: int = 50) -> pd.DataFrame:
+def load_data(
+    ticker: str, period: str = "1y", interval: str = "1d", chunk_size: int = 50
+) -> pd.DataFrame:
     try:
-        df = yf.download(ticker, period=period, interval=interval, progress=False, threads=True, auto_adjust=True)
-        return pd.DataFrame(df['Close'][ticker].values, columns=['Close'], index=df.index)
+        df = yf.download(
+            ticker,
+            period=period,
+            interval=interval,
+            progress=False,
+            threads=True,
+            auto_adjust=True,
+        )
+        return pd.DataFrame(
+            df["Close"][ticker].values, columns=["Close"], index=df.index
+        )
     except Exception as e:
-        print(f"Erro ao baixar dados para {ticker}: {e}")
-    return 
+        print(f"Erro ao baixar dados para {ticker}: {e}\n{df}")
+    return
 
 
 @st.cache_data
-def info(ticker:str)-> pd.DataFrame:
+def info(ticker: str) -> pd.DataFrame:
     """
     Busca informações principais de uma ação usando yfinance.
-    
+
     Parâmetros:
         ticker (str): Exemplo "PETR4.SA"
-    
+
     Retorna:
         DataFrame com detalhes da empresa
     """
@@ -55,12 +72,39 @@ def info(ticker:str)-> pd.DataFrame:
         "Nome": info.get("longName", "N/A"),
         "Setor": info.get("sector", "N/A"),
         "Subsetor": info.get("industry", "N/A"),
-        "Preço Atual": acao.history(period="1d")["Close"].iloc[-1] if not acao.history(period="1d").empty else None,
+        "Preço Atual": acao.history(period="1d")["Close"].iloc[-1]
+        if not acao.history(period="1d").empty
+        else None,
         "Valor de Mercado": info.get("marketCap", "N/A"),
         "P/L (Trailing PE)": info.get("trailingPE", "N/A"),
-        "Dividend Yield": info.get("dividendYield", 0) if info.get("dividendYield") else 0,
-        "Beta": info.get("beta", "N/A")
+        "Dividend Yield": info.get("dividendYield", 0)
+        if info.get("dividendYield")
+        else 0,
+        "Beta": info.get("beta", "N/A"),
     }
     # Converte para DataFrame vertical
-    df_vertical = pd.DataFrame.from_dict(dados, orient='index', columns=['Valor'])
+    df_vertical = pd.DataFrame.from_dict(dados, orient="index", columns=["Valor"])
     return df_vertical
+
+
+from dateutil.relativedelta import relativedelta
+
+
+def get_selic(period=1):
+    today = date.today()
+    and_date = date.today().strftime("%Y-%m-%d")
+    start_date = today - relativedelta(years=1)
+
+    search = {"Selic": 432}
+    try:
+        return sgs.get(search, start=start_date, end=and_date)
+    except Exception as e:
+        print("Erro ao coletar dados da selic\n", e)
+        return
+
+
+if __name__ == "__main__":
+    serie = get_selic()
+
+    print(serie.head())
+    print(serie.tail())
