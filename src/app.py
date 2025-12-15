@@ -1,10 +1,10 @@
 import streamlit as st
 
 from utils.data import load_ibov_tickers, get_selic
-from utils.volatility import calcular_retorno_carteira
+from utils.volatility import calcular_retorno_carteira, retorno_total_carteira
 
 from screens.serie import display_serie
-from screens.portfolio import display_portfolio_volatility, retorno_total_carteira
+from screens.portfolio import display_portfolio_volatility
 from screens.serie import display_series
 
 
@@ -15,6 +15,7 @@ def get_markdown(path):
 
 st.title("INVESTWEB")
 st.write("Aplicativo para análise de ações da bolsa Brasileira.")
+st.markdown('_As ações listadas aqui são ações da Ibovespa, por serem ações com mais liquidez._')
 
 tab1, tab2, tab3 = st.tabs(["Análise de Ação", "Simulação de Carteira", "Guia Rapido"])
 

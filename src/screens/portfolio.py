@@ -33,28 +33,3 @@ def display_portfolio_volatility(tab=None, period="1y", interval="1d"):
 
     return multi_tickers
 
-
-def retorno_total_carteira(df, valor_inicial=1000, pesos=None):
-    if df is None or df.empty:
-        return None
-    # Se não passar pesos, divide igualmente
-    n = len(df.columns)
-    if pesos is None:
-        pesos = [1 / n] * n
-
-    # Converte a linha em série se tiver apenas uma linha
-    if len(df) == 1:
-        df = df.iloc[0]
-
-    # Retornos ponderados
-    retorno_ponderado = sum(
-        p * df[ticker]
-        for p, ticker in zip(
-            pesos, df.index if isinstance(df, pd.Series) else df.columns
-        )
-    )
-
-    # Valor final
-    valor_final = valor_inicial * (1 + retorno_ponderado)
-
-    return valor_final, valor_final - valor_inicial

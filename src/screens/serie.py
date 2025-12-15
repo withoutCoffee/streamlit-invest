@@ -1,7 +1,7 @@
 import yfinance as yf
 from utils.data import load_data, info
 from utils.volatility import annualized_volatility_from_prices
-from utils.moving_average import mean_avarage
+from utils.moving_average import bollinger, mean_avarage, plot_bollinger
 
 
 # Display de tab1 confirmada
@@ -11,6 +11,7 @@ def display_serie(tab, selected_value, period, interval):
     # informações da ação
     try:
         df = load_data(selected_value, interval=interval, period=period)
+        print(df)
         # Gráfico de preços
         st.subheader("Informação da Ação e Gráfico de Preços de Fechamento Diário")
 
@@ -27,6 +28,10 @@ def display_serie(tab, selected_value, period, interval):
         st.subheader("Gráfico de Preço e Média Móvel")
         df["MM"] = df["Close"].rolling(window=20).mean()
         st.plotly_chart(mean_avarage(df, selected_value))
+        # Bodas de bolinger
+        st.subheader("Gráfico Bodas de Bollinger")
+        bodas = bollinger(df)
+        st.plotly_chart(plot_bollinger(bodas))
 
     except Exception as e:
         st.error(f"Erro ao carregar dados da ação:{e}", icon="🚨")
