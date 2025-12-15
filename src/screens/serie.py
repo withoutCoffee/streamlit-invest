@@ -11,7 +11,6 @@ def display_serie(tab, selected_value, period, interval):
     # informações da ação
     try:
         df = load_data(selected_value, interval=interval, period=period)
-        print(df)
         # Gráfico de preços
         st.subheader("Informação da Ação e Gráfico de Preços de Fechamento Diário")
 
