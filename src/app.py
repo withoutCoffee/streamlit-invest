@@ -4,7 +4,7 @@ from utils.data import load_ibov_tickers, get_selic
 from utils.volatility import calcular_retorno_carteira, retorno_total_carteira
 
 from screens.serie import display_serie
-from screens.portfolio import display_portfolio_volatility
+from screens.portfolio import display_portfolio_volatility, display_portfolio
 from screens.serie import display_series
 
 
@@ -71,6 +71,9 @@ with tab2:
         selected_tickers, period=period, interval=interval
     )
     st.dataframe(ret_total)
+    fig = display_portfolio(ret_total)
+    if fig :
+        st.plotly_chart(fig)
 
     number = st.number_input("Valor inicial de investimento inicial:", value=1000)
     st.write(

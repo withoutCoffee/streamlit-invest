@@ -25,7 +25,8 @@ def display_serie(tab, selected_value, period, interval):
         st.markdown(f"#### {vol}%")
         #
         st.subheader("Gráfico de Preço e Média Móvel")
-        df["MM"] = df["Close"].rolling(window=20).mean()
+        df["MM_20"] = df["Close"].rolling(window=20).mean()
+        df["MM_50"] = df["Close"].rolling(window=50).mean()
         st.plotly_chart(mean_avarage(df, selected_value))
         # Bodas de bolinger
         st.subheader("Gráfico Bodas de Bollinger")

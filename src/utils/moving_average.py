@@ -15,10 +15,18 @@ def mean_avarage(dados,ticker):
     # Média Móvel
     fig.add_trace(go.Scatter(
         x=dados.index, 
-        y=dados['MM'], 
+        y=dados['MM_20'], 
         mode='lines', 
-        name='Média Móvel',
+        name='Média Móvel 20D',
         line=dict(color='orange')
+    ))
+    # Média Móvel
+    fig.add_trace(go.Scatter(
+        x=dados.index, 
+        y=dados['MM_50'], 
+        mode='lines', 
+        name='Média Móvel 50D',
+        line=dict(color='#FF6692')
     ))
 
     # Layout
@@ -32,10 +40,10 @@ def mean_avarage(dados,ticker):
 
 def bollinger(data, window = 20, k=2) -> pd.DataFrame:
     df = pd.DataFrame()
-    df['MM'] = data['Close'].rolling(window).mean()
+    df[f'MM_{window}'] = data['Close'].rolling(window).mean()
     df['STD'] = data['Close'].rolling(window).std()
-    df['Upper'] = df['MM'] + k * df['STD']
-    df['Lower'] = df['MM'] - k * df['STD']
+    df['Upper'] = df[f'MM_{window}'] + k * df['STD']
+    df['Lower'] = df[f'MM_{window}'] - k * df['STD']
 
     df['Close'] = data['Close']
     return df
@@ -52,7 +60,7 @@ def plot_bollinger(df):
     # Média Móvel
     fig.add_trace(go.Scatter(
         x=df.index,
-        y=df['MM'],
+        y=df['MM_20'],
         mode='lines',
         name='MM 20',
         line=dict(color='orange', width=2)
