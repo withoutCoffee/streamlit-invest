@@ -70,22 +70,18 @@ with tab2:
     ret_total = calcular_retorno_carteira(
         selected_tickers, period=period, interval=interval
     )
-    st.dataframe(ret_total)
+    #st.dataframe(ret_total)
+
     fig = display_portfolio(ret_total)
     if fig :
         st.plotly_chart(fig)
 
     number = st.number_input("Valor inicial de investimento inicial:", value=1000)
     st.write(
-        "Retorno de investimento da carteira: de R$1000 e divisão igualitária entre os ativos."
+        f"Retorno de investimento da carteira: de R${number} e divisão igualitária entre os ativos."
     )
     try:
         valor_final, lucro = retorno_total_carteira(ret_total, valor_inicial=number)
-        st.markdown(f"Valor final: **RS {valor_final:.2f}**, Lucro: **RS {lucro:.2f}**")
-
-        # retorno_selic = calcular_retorno_carteira(
-        #     get_selic(period=int(period.split('y')[0])), period=period, interval=interval
-        # )
-        # st.markdown(f"Valor selic: **RS {retorno_selic:.2f}")
+        st.markdown(f"Valor final: **RS {valor_final:.2f}**\n Lucro: **RS {lucro:.2f}**")
     except Exception as e:
         st.write(f"Erro ao calcular retorno da carteira: {e}")

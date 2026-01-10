@@ -50,14 +50,18 @@ def display_portfolio(df):
         return False
 
     # Extraindo valores da primeira (e única) linha
+    labels = df.columns
+    values = df.iloc[0].values
+    cores = ["green" if v >= 0 else "red" for v in values]
 
     fig = go.Figure()
     fig.add_trace(
         go.Bar(
-            x=df.columns,
-            y=df.iloc[0] * 100,
-            text=(df.iloc[0] * 100).round(2),
-            textposition="outside",
+            x=labels,
+            y=values * 100,
+            marker=dict(color=cores),
+            text=[f"{v:.2%}" for v in values],
+            textposition="auto",
         )
     )
 
