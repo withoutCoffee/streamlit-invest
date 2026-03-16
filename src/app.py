@@ -1,11 +1,22 @@
+from datetime import datetime, timedelta
+import os
+
 import streamlit as st
 
-from utils.data import load_ibov_tickers, get_selic
+from utils.data import load_ibov_tickers
 from utils.volatility import calcular_retorno_carteira, retorno_total_carteira
 
-from screens.serie import display_serie
-from screens.portfolio import display_portfolio_volatility, display_portfolio
-from screens.serie import display_series
+from screens.serie import display_serie, display_series
+from screens.portfolio import display_portfolio_volatility
+from graficos.portfolio import display_portfolio
+
+# sempre que o app for iniciado verificar se tem o arquivo atualizado, se tiver mais de 5 dias do último download, baixar o arquivo atualizado
+from database.collect import download_ibov_tickers
+
+# Verificar se o arquivo de tickers do IBOV está atualizado
+ibov_file_path = "./data/IBOVDia_03-10-25.csv"
+if not os.path.exists(ibov_file_path) or (datetime.now() - datetime.fromtimestamp(os.path.getmtime(ibov_file_path))) > timedelta(days=5):
+    download_ibov_tickers("https://sistemaswebb3-listados.b3.com.br/indexPage/day/IBOV?language=pt-br", ibov_file_path)
 
 
 def get_markdown(path):

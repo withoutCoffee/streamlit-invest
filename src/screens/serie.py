@@ -1,7 +1,8 @@
 import yfinance as yf
 from utils.data import load_data, info
 from utils.volatility import annualized_volatility_from_prices
-from utils.moving_average import bollinger, mean_avarage, plot_bollinger
+from utils.moving_average import bollinger
+from graficos.serie import mean_avarage, plot_bollinger
 
 
 # Display de tab1 confirmada

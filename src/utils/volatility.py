@@ -75,3 +75,18 @@ def retorno_total_carteira(df, valor_inicial=1000, pesos=None):
     valor_final = valor_inicial * (1 + retorno_ponderado)
 
     return valor_final, valor_final - valor_inicial
+
+
+def list_stocks_by_volatility(tickers, period="1y", interval="1d"):
+    volatilities = {}
+    for ticker in tickers:
+        df = load_data(ticker, interval=interval, period=period)
+        if df is None:
+            continue
+        if not df.empty:
+            vol = annualized_volatility_from_prices(df["Close"])
+            volatilities[ticker] = vol.values[0]
+    sorted_volatilities = dict(
+        sorted(volatilities.items(), key=lambda item: item[1], reverse=False)
+    )
+    return sorted_volatilities
