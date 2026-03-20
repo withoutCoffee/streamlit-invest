@@ -1,7 +1,10 @@
 import plotly.graph_objects as go
 
 
-def mean_avarage(dados, ticker):
+def mean_avarage(dados, ticker, window1=20, window2=50):
+    col1 = f"MM_{window1}"
+    col2 = f"MM_{window2}"
+
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(
@@ -12,21 +15,21 @@ def mean_avarage(dados, ticker):
     ))
     fig.add_trace(go.Scatter(
         x=dados.index,
-        y=dados['MM_20'],
+        y=dados[col1],
         mode='lines',
-        name='Média Móvel 20D',
+        name=f'Média Móvel {window1}D',
         line=dict(color='orange')
     ))
     fig.add_trace(go.Scatter(
         x=dados.index,
-        y=dados['MM_50'],
+        y=dados[col2],
         mode='lines',
-        name='Média Móvel 50D',
+        name=f'Média Móvel {window2}D',
         line=dict(color='#FF6692')
     ))
 
     fig.update_layout(
-        title=f'Série Temporal - {ticker} com Média Móvel 20D',
+        title=f'Série Temporal - {ticker} com Médias Móveis {window1}D e {window2}D',
         xaxis_title='Data',
         yaxis_title='Preço',
         hovermode='x unified'

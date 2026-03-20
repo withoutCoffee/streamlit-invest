@@ -31,6 +31,14 @@ def display_serie(tab):
 
     confirm = tab.button("Buscar", key="serie_confirm", use_container_width=True)
 
+    col_mm1, col_mm2 = tab.columns(2)
+    mm1 = col_mm1.number_input(
+        "Janela Média Móvel 1 (dias)", min_value=2, max_value=500, value=20, step=1, key="serie_mm1"
+    )
+    mm2 = col_mm2.number_input(
+        "Janela Média Móvel 2 (dias)", min_value=2, max_value=500, value=50, step=1, key="serie_mm2"
+    )
+
     if not confirm:
         return
 
@@ -67,9 +75,11 @@ def display_serie(tab):
         tab.markdown(f"#### {vol}%")
 
         tab.subheader("Gráfico de Preço e Média Móvel")
-        df["MM_20"] = df["Close"].rolling(window=20).mean()
-        df["MM_50"] = df["Close"].rolling(window=50).mean()
-        tab.plotly_chart(mean_avarage(df, ticker))
+        col_mm1 = f"MM_{mm1}"
+        col_mm2 = f"MM_{mm2}"
+        df[col_mm1] = df["Close"].rolling(window=mm1).mean()
+        df[col_mm2] = df["Close"].rolling(window=mm2).mean()
+        tab.plotly_chart(mean_avarage(df, ticker, window1=mm1, window2=mm2))
 
         tab.subheader("Gráfico Bandas de Bollinger")
         bodas = bollinger(df)
