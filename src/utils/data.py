@@ -23,6 +23,9 @@ def normalize_tickers(tickers: List[str]) -> List[str]:
     return [normalize_ticker(t) for t in tickers if isinstance(t, str) and t.strip()]
 
 
+IBOV_FILE_PATH = "./data/IBOVDia_03-10-25.csv"
+
+
 def load_ibov_tickers(path: str) -> list:
     ibov_tickers = pd.read_csv(path, encoding="latin1", sep=";", skiprows=1)
     ibov_tickers = ibov_tickers.index
@@ -48,7 +51,7 @@ def load_data(
             df["Close"][ticker].values, columns=["Close"], index=df.index
         )
     except Exception as e:
-        print(f"Erro ao baixar dados para {ticker}: {e}\n{df}")
+        print(f"Erro ao baixar dados para {ticker}: {e}")
     return
 
 

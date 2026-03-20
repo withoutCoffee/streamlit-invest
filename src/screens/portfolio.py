@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.data import load_ibov_tickers, load_data, normalize_ticker
+from utils.data import load_ibov_tickers, load_data, normalize_ticker, IBOV_FILE_PATH
 from utils.volatility import annualized_volatility_from_prices
 
 
@@ -8,9 +8,28 @@ def display_portfolio_volatility(tab=None, period="1y", interval="1d"):
         st.session_state.portfolio_tickers = []
     if "portfolio_volatilities" not in st.session_state:
         st.session_state.portfolio_volatilities = {}
+    if "portfolio_period" not in st.session_state:
+        st.session_state.portfolio_period = period
+    if "portfolio_interval" not in st.session_state:
+        st.session_state.portfolio_interval = interval
+
+    if (
+        st.session_state.portfolio_tickers
+        and (
+            st.session_state.portfolio_period != period
+            or st.session_state.portfolio_interval != interval
+        )
+    ):
+        st.session_state.portfolio_period = period
+        st.session_state.portfolio_interval = interval
+        for t in st.session_state.portfolio_tickers:
+            df = load_data(t, period=period, interval=interval)
+            if df is not None and not df.empty:
+                vol = annualized_volatility_from_prices(df["Close"])
+                st.session_state.portfolio_volatilities[t] = vol.values[0]
 
     try:
-        suggestions = [t.replace(".SA", "") for t in load_ibov_tickers("./data/IBOVDia_03-10-25.csv")]
+        suggestions = [t.replace(".SA", "") for t in load_ibov_tickers(IBOV_FILE_PATH)]
     except Exception:
         suggestions = []
 

@@ -17,7 +17,7 @@ def annualized_volatility_from_prices(prices: Union[pd.Series, pd.DataFrame], re
     if prices.empty:
         return pd.Series(dtype=float)
 
-    rets = profit(prices, returns = returns)
+    rets = calcular_retornos(prices, returns=returns)
 
     vol_daily = rets.std()
     vol_annual = vol_daily * np.sqrt(252)
@@ -25,9 +25,10 @@ def annualized_volatility_from_prices(prices: Union[pd.Series, pd.DataFrame], re
 
     return vol_pct.round(2).sort_values(ascending=False)
 
-def profit(prices: pd.Series, returns: str = "log") -> float:
+def calcular_retornos(prices: pd.Series, returns: str = "log") -> pd.Series:
     """
-    Calcula o lucro percentual de uma série de preços.
+    Calcula os retornos de uma série de preços.
+    - returns: "log" (retornos logarítmicos) ou "simple" (retornos percentuais)
     """
     if prices.empty:
         return pd.Series(dtype=float)

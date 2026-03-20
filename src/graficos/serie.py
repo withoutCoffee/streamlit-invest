@@ -37,7 +37,8 @@ def mean_avarage(dados, ticker, window1=20, window2=50):
     return fig
 
 
-def plot_bollinger(df):
+def plot_bollinger(df, window=20):
+    mm_col = f'MM_{window}'
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(
@@ -49,9 +50,9 @@ def plot_bollinger(df):
     ))
     fig.add_trace(go.Scatter(
         x=df.index,
-        y=df['MM_20'],
+        y=df[mm_col],
         mode='lines',
-        name='MM 20',
+        name=f'MM {window}',
         line=dict(color='orange', width=2)
     ))
     fig.add_trace(go.Scatter(

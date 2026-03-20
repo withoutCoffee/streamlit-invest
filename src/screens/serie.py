@@ -1,6 +1,6 @@
 import yfinance as yf
 import streamlit as st
-from utils.data import load_data, info, load_ibov_tickers, normalize_ticker
+from utils.data import load_data, info, load_ibov_tickers, normalize_ticker, IBOV_FILE_PATH
 from utils.volatility import annualized_volatility_from_prices
 from utils.moving_average import bollinger
 from graficos.serie import mean_avarage, plot_bollinger
@@ -17,7 +17,7 @@ def display_serie(tab):
     )
 
     try:
-        suggestions = [t.replace(".SA", "") for t in load_ibov_tickers("./data/IBOVDia_03-10-25.csv")]
+        suggestions = [t.replace(".SA", "") for t in load_ibov_tickers(IBOV_FILE_PATH)]
     except Exception:
         suggestions = []
 
@@ -31,12 +31,15 @@ def display_serie(tab):
 
     confirm = tab.button("Buscar", key="serie_confirm", use_container_width=True)
 
-    col_mm1, col_mm2 = tab.columns(2)
+    col_mm1, col_mm2, col_bb = tab.columns(3)
     mm1 = col_mm1.number_input(
         "Janela Média Móvel 1 (dias)", min_value=2, max_value=500, value=20, step=1, key="serie_mm1"
     )
     mm2 = col_mm2.number_input(
         "Janela Média Móvel 2 (dias)", min_value=2, max_value=500, value=50, step=1, key="serie_mm2"
+    )
+    bb_window = col_bb.number_input(
+        "Janela Bollinger (dias)", min_value=2, max_value=500, value=20, step=1, key="serie_bb_window"
     )
 
     if not confirm:
@@ -82,8 +85,8 @@ def display_serie(tab):
         tab.plotly_chart(mean_avarage(df, ticker, window1=mm1, window2=mm2))
 
         tab.subheader("Gráfico Bandas de Bollinger")
-        bodas = bollinger(df)
-        tab.plotly_chart(plot_bollinger(bodas))
+        bodas = bollinger(df, window=bb_window)
+        tab.plotly_chart(plot_bollinger(bodas, window=bb_window))
 
     except Exception as e:
         tab.error(f"Erro ao carregar dados da ação **{ticker}**: {e}", icon="🚨")
