@@ -3,7 +3,6 @@ import os
 
 import streamlit as st
 
-from utils.data import load_ibov_tickers
 from utils.volatility import calcular_retorno_carteira, retorno_total_carteira
 
 from screens.serie import display_serie, display_series
@@ -33,28 +32,7 @@ tab1, tab2, tab3 = st.tabs(["Análise de Ação", "Simulação de Carteira", "Gu
 tab3.markdown(get_markdown("./data/info.md"))
 
 with tab1:
-    col1, col2 = st.columns(2)
-
-    period = col1.selectbox(
-        "Período", options=["1y", "2y", "3y", "5y", "10y"], index=3, key="selectbox_1"
-    )
-    interval = col1.selectbox(
-        "Intervalo", options=["1d", "1wk", "1mo"], index=0, key="selectbox_2"
-    )
-
-    selected_value = col2.selectbox(
-        "Selecione uma ação:",
-        load_ibov_tickers("./data/IBOVDia_03-10-25.csv"),
-        key="selectbox_3",
-    )
-    confirm = st.button("Confirmar", width="stretch", key="button_1")
-
-    if confirm:
-        col2.write(f"Período selecionado: {period}")
-        col2.write(f"Intervalo selecionado: {interval}")
-        display_serie(tab1, selected_value, period, interval)
-    else:
-        col2.write("Aguardando confirmação...")
+    display_serie(tab1)
 
 with tab2:
     col1, col2 = st.columns(2)
@@ -66,20 +44,15 @@ with tab2:
         "Intervalo", options=["1d", "1wk", "1mo"], index=0, key="selectbox_5"
     )
 
-    # Seleção de ações por volatilidade
-    multi_tickers = display_portfolio_volatility(period=p, interval=i, tab=tab2)
+    selected_tickers = display_portfolio_volatility(period=p, interval=i, tab=tab2)
 
-    selected_tickers = list(
-        map(lambda x: x.split(" - ")[0], multi_tickers)
-    )  # retira o valor da volatilidade
-
-    # Graficos se série temporais de preços das ações selecionadas
-    display_series(tab2, selected_tickers, period, interval)
+    # Gráficos de série temporais de preços das ações selecionadas
+    display_series(tab2, selected_tickers, p, i)
 
     # Retorno da carteira
     st.subheader("Retorno das ações da carteira")
     ret_total = calcular_retorno_carteira(
-        selected_tickers, period=period, interval=interval
+        selected_tickers, period=p, interval=i
     )
     #st.dataframe(ret_total)
 

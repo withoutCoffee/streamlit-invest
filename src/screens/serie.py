@@ -1,52 +1,94 @@
 import yfinance as yf
-from utils.data import load_data, info
+import streamlit as st
+from utils.data import load_data, info, load_ibov_tickers, normalize_ticker
 from utils.volatility import annualized_volatility_from_prices
 from utils.moving_average import bollinger
 from graficos.serie import mean_avarage, plot_bollinger
 
 
-# Display de tab1 confirmada
-def display_serie(tab, selected_value, period, interval):
-    st = tab
+def display_serie(tab):
+    col1, col2 = tab.columns(2)
 
-    # informações da ação
+    period = col1.selectbox(
+        "Período", options=["1y", "2y", "3y", "5y", "10y"], index=3, key="serie_period"
+    )
+    interval = col1.selectbox(
+        "Intervalo", options=["1d", "1wk", "1mo"], index=0, key="serie_interval"
+    )
+
     try:
-        df = load_data(selected_value, interval=interval, period=period)
-        # Gráfico de preços
-        st.subheader("Informação da Ação e Gráfico de Preços de Fechamento Diário")
+        suggestions = [t.replace(".SA", "") for t in load_ibov_tickers("./data/IBOVDia_03-10-25.csv")]
+    except Exception:
+        suggestions = []
 
-        st.dataframe(info(selected_value))
-        st.line_chart(df)
+    ticker_input = col2.text_input(
+        "Código da ação:",
+        key="serie_ticker_input",
+        placeholder="Ex: PETR4, VALE3, AAPL...",
+    )
+    if suggestions:
+        col2.caption("Sugestões (Ibovespa): " + ", ".join(suggestions[:20]) + "...")
 
-        #
-        st.subheader("Estatísticas Descritivas")
-        st.write(df.describe())
-        st.subheader("Volatilidade Anualizada")
-        vol = annualized_volatility_from_prices(df["Close"])[0]
-        st.markdown(f"#### {vol}%")
-        #
-        st.subheader("Gráfico de Preço e Média Móvel")
-        df["MM_20"] = df["Close"].rolling(window=20).mean()
-        df["MM_50"] = df["Close"].rolling(window=50).mean()
-        st.plotly_chart(mean_avarage(df, selected_value))
-        # Bodas de bolinger
-        st.subheader("Gráfico Bodas de Bollinger")
-        bodas = bollinger(df)
-        st.plotly_chart(plot_bollinger(bodas))
+    confirm = tab.button("Buscar", key="serie_confirm", use_container_width=True)
 
-    except Exception as e:
-        st.error(f"Erro ao carregar dados da ação:{e}", icon="🚨")
-
-
-# Display de tab1 confirmada
-def display_series(tab, tickers, period, interval):
-    st = tab
-    if len(tickers) == 1:
-        df = load_data(ticker=tickers[0], interval=interval, period=period)
-        st.line_chart(df)
+    if not confirm:
         return
 
-    # informações da ação
+    raw = ticker_input.strip()
+    if not raw:
+        tab.warning("Digite o código de uma ação para pesquisar.")
+        return
+
+    ticker = normalize_ticker(raw)
+
+    try:
+        df = load_data(ticker, interval=interval, period=period)
+        if df is None or df.empty:
+            tab.error(
+                f"Não foi possível carregar dados para **{ticker}**. "
+                "Verifique o código da ação e tente novamente.",
+                icon="🚨",
+            )
+            return
+
+        tab.subheader("Informação da Ação e Gráfico de Preços de Fechamento Diário")
+        try:
+            tab.dataframe(info(ticker))
+        except Exception:
+            tab.info("Informações detalhadas não disponíveis para este ativo.")
+
+        tab.line_chart(df)
+
+        tab.subheader("Estatísticas Descritivas")
+        tab.write(df.describe())
+
+        tab.subheader("Volatilidade Anualizada")
+        vol = annualized_volatility_from_prices(df["Close"])[0]
+        tab.markdown(f"#### {vol}%")
+
+        tab.subheader("Gráfico de Preço e Média Móvel")
+        df["MM_20"] = df["Close"].rolling(window=20).mean()
+        df["MM_50"] = df["Close"].rolling(window=50).mean()
+        tab.plotly_chart(mean_avarage(df, ticker))
+
+        tab.subheader("Gráfico Bandas de Bollinger")
+        bodas = bollinger(df)
+        tab.plotly_chart(plot_bollinger(bodas))
+
+    except Exception as e:
+        tab.error(f"Erro ao carregar dados da ação **{ticker}**: {e}", icon="🚨")
+
+
+def display_series(tab, tickers, period, interval):
+    if not tickers:
+        return
+
+    if len(tickers) == 1:
+        df = load_data(ticker=tickers[0], interval=interval, period=period)
+        if df is not None and not df.empty:
+            tab.line_chart(df)
+        return
+
     try:
         df = yf.download(
             tickers,
@@ -56,8 +98,7 @@ def display_series(tab, tickers, period, interval):
             threads=True,
             auto_adjust=True,
         )
-        # Gráfico de preços
-        st.line_chart(df["Close"])
+        tab.line_chart(df["Close"])
     except Exception as e:
-        st.write(f"Erro ao carregar dados das ações:{e}\n{tickers}")
-    st.divider()
+        tab.write(f"Erro ao carregar dados das ações: {e}\n{tickers}")
+    tab.divider()
